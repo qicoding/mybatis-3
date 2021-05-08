@@ -40,6 +40,7 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
 
 /**
+ * 默认的SqlSession
  * The default implementation for {@link SqlSession}.
  * Note that this class is not Thread-Safe.
  *
@@ -47,11 +48,16 @@ import org.apache.ibatis.session.SqlSession;
  */
 public class DefaultSqlSession implements SqlSession {
 
+  /** 配置信息 */
   private final Configuration configuration;
+  /** 执行器 */
   private final Executor executor;
 
+  /** 是否自动提交 */
   private final boolean autoCommit;
+  /** 缓存是否已经被污染 */
   private boolean dirty;
+  /** 游标列表 */
   private List<Cursor<?>> cursorList;
 
   public DefaultSqlSession(Configuration configuration, Executor executor, boolean autoCommit) {
@@ -93,6 +99,17 @@ public class DefaultSqlSession implements SqlSession {
     return this.selectMap(statement, parameter, mapKey, RowBounds.DEFAULT);
   }
 
+  /**
+   * 要想selectMap实际上先selectList
+   * selectMap是一种特殊情况，它用于根据结果对象中的属性之一将结果列表转换为Map。
+   * @param statement SQL语句唯一标识
+   * @param parameter 要传递给SQL语句的参数对象
+   * @param mapKey 用作列表中每个值的键的属性
+   * @param rowBounds 翻页限制条件
+   * @param <K>
+   * @param <V>
+   * @return
+   */
   @Override
   public <K, V> Map<K, V> selectMap(String statement, Object parameter, String mapKey, RowBounds rowBounds) {
     final List<? extends V> list = selectList(statement, parameter, rowBounds);
@@ -145,6 +162,14 @@ public class DefaultSqlSession implements SqlSession {
     return selectList(statement, parameter, rowBounds, Executor.NO_RESULT_HANDLER);
   }
 
+  /**
+   * 查询结果列表
+   * @param <E> 返回的列表元素的类型
+   * @param statement SQL语句
+   * @param parameter 参数对象
+   * @param rowBounds  翻页限制条件
+   * @return 结果对象列表
+   */
   private <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds, ResultHandler handler) {
     try {
       MappedStatement ms = configuration.getMappedStatement(statement);

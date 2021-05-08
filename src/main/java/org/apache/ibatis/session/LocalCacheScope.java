@@ -16,8 +16,13 @@
 package org.apache.ibatis.session;
 
 /**
+ * 本地缓存作用域
  * @author Eduardo Macarron
  */
 public enum LocalCacheScope {
+  /**
+   * SESSION    本地缓存的作用域为一次会话
+   * STATEMENT  本地缓存的作用域为一条语句，也就是不进行任何缓存
+   */
   SESSION,STATEMENT
 }

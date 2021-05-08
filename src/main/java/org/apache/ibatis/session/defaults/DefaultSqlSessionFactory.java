@@ -32,6 +32,7 @@ import org.apache.ibatis.transaction.TransactionFactory;
 import org.apache.ibatis.transaction.managed.ManagedTransactionFactory;
 
 /**
+ * 默认SqlSession工厂
  * @author Clinton Begin
  */
 public class DefaultSqlSessionFactory implements SqlSessionFactory {
@@ -90,10 +91,15 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
   private SqlSession openSessionFromDataSource(ExecutorType execType, TransactionIsolationLevel level, boolean autoCommit) {
     Transaction tx = null;
     try {
+      // 获取要使用的指定环境
       final Environment environment = configuration.getEnvironment();
+      // 从环境中获取事务工厂
       final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment(environment);
+      // 从事务工厂中生产事务
       tx = transactionFactory.newTransaction(environment.getDataSource(), level, autoCommit);
+      // 创建执行器
       final Executor executor = configuration.newExecutor(tx, execType);
+      // 创建DefaultSqlSession对象
       return new DefaultSqlSession(configuration, executor, autoCommit);
     } catch (Exception e) {
       closeTransaction(tx); // may have fetched a connection so lets call close()

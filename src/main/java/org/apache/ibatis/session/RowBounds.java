@@ -16,6 +16,7 @@
 package org.apache.ibatis.session;
 
 /**
+ * 行边界
  * @author Clinton Begin
  */
 public class RowBounds {
@@ -24,7 +25,13 @@ public class RowBounds {
   public static final int NO_ROW_LIMIT = Integer.MAX_VALUE;
   public static final RowBounds DEFAULT = new RowBounds();
 
+  /**
+   * 起始位置
+   */
   private final int offset;
+  /**
+   * 总长度限制
+   */
   private final int limit;
 
   public RowBounds() {

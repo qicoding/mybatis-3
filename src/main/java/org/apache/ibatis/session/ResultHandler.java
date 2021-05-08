@@ -16,6 +16,7 @@
 package org.apache.ibatis.session;
 
 /**
+ * 结果集上下文处理器接口
  * @author Clinton Begin
  */
 public interface ResultHandler<T> {

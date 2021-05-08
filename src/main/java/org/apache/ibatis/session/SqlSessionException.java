@@ -18,6 +18,7 @@ package org.apache.ibatis.session;
 import org.apache.ibatis.exceptions.PersistenceException;
 
 /**
+ * Sql会话异常
  * @author Clinton Begin
  */
 public class SqlSessionException extends PersistenceException {
