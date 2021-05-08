@@ -111,18 +111,26 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 
   private SqlSession openSessionFromConnection(ExecutorType execType, Connection connection) {
     try {
+      // 是否自动提交
       boolean autoCommit;
       try {
+        // 从connection中获取是否自动提交
         autoCommit = connection.getAutoCommit();
       } catch (SQLException e) {
         // Failover to true, as most poor drivers
         // or databases won't support transactions
+        // 出现异常默认为true，因为大多数不良的驱动程序或数据库将不支持事务
         autoCommit = true;
       }
+      // 获取要使用的指定环境
       final Environment environment = configuration.getEnvironment();
+      // 从环境中获取事务工厂
       final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment(environment);
+      // 从事务工厂中生产事务
       final Transaction tx = transactionFactory.newTransaction(connection);
+      // 创建执行器
       final Executor executor = configuration.newExecutor(tx, execType);
+      // 创建DefaultSqlSession对象
       return new DefaultSqlSession(configuration, executor, autoCommit);
     } catch (Exception e) {
       throw ExceptionFactory.wrapException("Error opening session.  Cause: " + e, e);
