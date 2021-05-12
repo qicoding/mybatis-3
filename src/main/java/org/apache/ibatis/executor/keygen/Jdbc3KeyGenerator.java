@@ -44,6 +44,7 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 import org.apache.ibatis.util.MapUtil;
 
 /**
+ * 主键生成器 （自增的，也就是数据库自增后如果需要知道值，就用这个，这个是将自增结果回填到对象中）
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */
@@ -72,16 +73,23 @@ public class Jdbc3KeyGenerator implements KeyGenerator {
   }
 
   public void processBatch(MappedStatement ms, Statement stmt, Object parameter) {
+    // 拿到主键的属性名
     final String[] keyProperties = ms.getKeyProperties();
     if (keyProperties == null || keyProperties.length == 0) {
+      // 没有主键则无需操作
       return;
     }
+    // 调用Statement对象的getGeneratedKeys方法获取自动生成的主键值
     try (ResultSet rs = stmt.getGeneratedKeys()) {
+      // 获取输出结果的描述信息
       final ResultSetMetaData rsmd = rs.getMetaData();
       final Configuration configuration = ms.getConfiguration();
       if (rsmd.getColumnCount() < keyProperties.length) {
         // Error?
+        // 主键数目比结果的总字段数目还多，则发生了错误。
+        // 但因为此处是获取主键这样的附属操作，因此忽略错误，不影响主流程
       } else {
+        // 调用子方法，将主键值赋给实参
         assignKeys(configuration, rs, rsmd, keyProperties, parameter);
       }
     } catch (Exception e) {

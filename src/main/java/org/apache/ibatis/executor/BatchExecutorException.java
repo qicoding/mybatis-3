@@ -19,6 +19,9 @@ import java.sql.BatchUpdateException;
 import java.util.List;
 
 /**
+ * 批执行器异常(对java.sql.BatchUpdateException的包装)
+ * 如果在执行任何嵌套批处理期间捕获到<code> java.sql.BatchUpdateException <code>，则抛出此异常。
+ * 异常包含作为根本原因的java.sql.BatchUpdateException，以及成功执行的任何先前的嵌套批处理的结果。
  * This exception is thrown if a <code>java.sql.BatchUpdateException</code> is caught
  * during the execution of any nested batch.  The exception contains the
  * java.sql.BatchUpdateException that is the root cause, as well as

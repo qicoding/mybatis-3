@@ -34,6 +34,7 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 
 /**
+ * 重用执行器 重用针对的是Statement的重用
  * @author Clinton Begin
  */
 public class ReuseExecutor extends BaseExecutor {
@@ -79,14 +80,21 @@ public class ReuseExecutor extends BaseExecutor {
 
   private Statement prepareStatement(StatementHandler handler, Log statementLog) throws SQLException {
     Statement stmt;
+    // 获取执行SQL
     BoundSql boundSql = handler.getBoundSql();
     String sql = boundSql.getSql();
+    // 判断SQL是否已经有Statement
     if (hasStatementFor(sql)) {
+      // 直接从map中获取Statement
       stmt = getStatement(sql);
+      // 设置事务超时
       applyTransactionTimeout(stmt);
     } else {
+      // 获取连接
       Connection connection = getConnection(statementLog);
+      // 获取statement
       stmt = handler.prepare(connection, transaction.getTimeout());
+      // 缓存statement
       putStatement(sql, stmt);
     }
     handler.parameterize(stmt);

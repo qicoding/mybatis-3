@@ -21,6 +21,7 @@ import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.MappedStatement;
 
 /**
+ * 主键生成器接口
  * @author Clinton Begin
  */
 public interface KeyGenerator {
