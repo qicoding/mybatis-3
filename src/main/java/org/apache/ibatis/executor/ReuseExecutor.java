@@ -39,31 +39,58 @@ import org.apache.ibatis.transaction.Transaction;
  */
 public class ReuseExecutor extends BaseExecutor {
 
+  /**
+   * statement对象缓存
+   */
   private final Map<String, Statement> statementMap = new HashMap<>();
 
   public ReuseExecutor(Configuration configuration, Transaction transaction) {
     super(configuration, transaction);
   }
 
+  /**
+   * 操作数据库更新
+   * @param ms 映射语句
+   * @param parameter 参数
+   * @return
+   * @throws SQLException
+   */
   @Override
   public int doUpdate(MappedStatement ms, Object parameter) throws SQLException {
     Configuration configuration = ms.getConfiguration();
+    // 新建语句处理器
     StatementHandler handler = configuration.newStatementHandler(this, ms, parameter, RowBounds.DEFAULT, null, null);
     Statement stmt = prepareStatement(handler, ms.getStatementLog());
+    // 执行sql语句
     return handler.update(stmt);
   }
 
+  /**
+   * 操作数据库查询
+   *
+   * @param ms 映射语句
+   * @param parameter 参数对象
+   * @param rowBounds 翻页限制条件
+   * @param resultHandler 结果处理器
+   * @param boundSql 查询语句
+   * @param <E> 结果类型
+   * @return
+   * @throws SQLException
+   */
   @Override
   public <E> List<E> doQuery(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) throws SQLException {
     Configuration configuration = ms.getConfiguration();
+    // 新建语句处理器
     StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler, boundSql);
     Statement stmt = prepareStatement(handler, ms.getStatementLog());
+    // 执行sql语句 并传入结果处理器 处理好结果返回
     return handler.query(stmt, resultHandler);
   }
 
   @Override
   protected <E> Cursor<E> doQueryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds, BoundSql boundSql) throws SQLException {
     Configuration configuration = ms.getConfiguration();
+    // 新建语句处理器
     StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, null, boundSql);
     Statement stmt = prepareStatement(handler, ms.getStatementLog());
     return handler.queryCursor(stmt);
@@ -78,6 +105,13 @@ public class ReuseExecutor extends BaseExecutor {
     return Collections.emptyList();
   }
 
+  /**
+   * 获取statement
+   * @param handler 语句处理器
+   * @param statementLog 日志
+   * @return
+   * @throws SQLException
+   */
   private Statement prepareStatement(StatementHandler handler, Log statementLog) throws SQLException {
     Statement stmt;
     // 获取执行SQL

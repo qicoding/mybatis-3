@@ -41,28 +41,53 @@ public class SimpleExecutor extends BaseExecutor {
     super(configuration, transaction);
   }
 
+  /**
+   * 操作数据库更新
+   * @param ms 映射语句
+   * @param parameter 参数
+   * @return
+   * @throws SQLException
+   */
   @Override
   public int doUpdate(MappedStatement ms, Object parameter) throws SQLException {
     Statement stmt = null;
     try {
       Configuration configuration = ms.getConfiguration();
+      // 新建语句处理器
       StatementHandler handler = configuration.newStatementHandler(this, ms, parameter, RowBounds.DEFAULT, null, null);
       stmt = prepareStatement(handler, ms.getStatementLog());
+      // 执行sql语句
       return handler.update(stmt);
     } finally {
+      // 关闭statement
       closeStatement(stmt);
     }
   }
 
+  /**
+   * 操作数据库查询
+   *
+   * @param ms 映射语句
+   * @param parameter 参数对象
+   * @param rowBounds 翻页限制条件
+   * @param resultHandler 结果处理器
+   * @param boundSql 查询语句
+   * @param <E> 结果类型
+   * @return
+   * @throws SQLException
+   */
   @Override
   public <E> List<E> doQuery(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) throws SQLException {
     Statement stmt = null;
     try {
       Configuration configuration = ms.getConfiguration();
+      // 新建语句处理器
       StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler, boundSql);
       stmt = prepareStatement(handler, ms.getStatementLog());
+      // 执行sql语句 并传入结果处理器 处理好结果返回
       return handler.query(stmt, resultHandler);
     } finally {
+      // 关闭statement
       closeStatement(stmt);
     }
   }
@@ -70,9 +95,11 @@ public class SimpleExecutor extends BaseExecutor {
   @Override
   protected <E> Cursor<E> doQueryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds, BoundSql boundSql) throws SQLException {
     Configuration configuration = ms.getConfiguration();
+    // 新建语句处理器
     StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, null, boundSql);
     Statement stmt = prepareStatement(handler, ms.getStatementLog());
     Cursor<E> cursor = handler.queryCursor(stmt);
+    // 当所有结果集关闭后关闭statement
     stmt.closeOnCompletion();
     return cursor;
   }
@@ -82,10 +109,19 @@ public class SimpleExecutor extends BaseExecutor {
     return Collections.emptyList();
   }
 
+  /**
+   * 获取 Statement 对象
+   * @param handler 语句处理器
+   * @param statementLog 日志
+   * @return
+   * @throws SQLException
+   */
   private Statement prepareStatement(StatementHandler handler, Log statementLog) throws SQLException {
     Statement stmt;
     Connection connection = getConnection(statementLog);
+    // 创建 Statement 对象
     stmt = handler.prepare(connection, transaction.getTimeout());
+    // 为语句设置参数
     handler.parameterize(stmt);
     return stmt;
   }

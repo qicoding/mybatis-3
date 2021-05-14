@@ -452,6 +452,7 @@ class BaseExecutorTest extends BaseDataTest {
 
       Author author = new Author(-1, "someone", "******", "someone@apache.org", null, Section.NEWS);
       executor.update(insertAuthor, author);
+      executor.update(insertAuthor, author);
       executor.query(selectAuthor, -1, RowBounds.DEFAULT, Executor.NO_RESULT_HANDLER);
       executor.flushStatements();
       executor.rollback(true);

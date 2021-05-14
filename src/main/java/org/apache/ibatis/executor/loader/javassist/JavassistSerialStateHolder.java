@@ -23,6 +23,7 @@ import org.apache.ibatis.executor.loader.ResultLoaderMap;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
 
 /**
+ * Javassist串行状态保持器
  * @author Eduardo Macarron
  */
 class JavassistSerialStateHolder extends AbstractSerialStateHolder {

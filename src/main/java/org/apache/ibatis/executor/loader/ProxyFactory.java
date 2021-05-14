@@ -22,14 +22,29 @@ import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.session.Configuration;
 
 /**
+ * 代理工厂接口
  * @author Eduardo Macarron
  */
 public interface ProxyFactory {
 
+  /**
+   * 设置工厂属性
+   * @param properties
+   */
   default void setProperties(Properties properties) {
     // NOP
   }
 
+  /**
+   * 创建一个代理
+   * @param target 代理的目标对象
+   * @param lazyLoader 要懒加载的属性Map
+   * @param configuration 配置
+   * @param objectFactory 对象工厂
+   * @param constructorArgTypes 构造方法参数类型列表
+   * @param constructorArgs 构造方法参数类型
+   * @return
+   */
   Object createProxy(Object target, ResultLoaderMap lazyLoader, Configuration configuration, ObjectFactory objectFactory, List<Class<?>> constructorArgTypes, List<Object> constructorArgs);
 
 }

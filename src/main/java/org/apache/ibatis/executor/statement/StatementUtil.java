@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
+ * 语句工具类
  * Utility for {@link java.sql.Statement}.
  *
  * @since 3.4.0

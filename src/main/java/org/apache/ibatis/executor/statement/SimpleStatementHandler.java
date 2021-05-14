@@ -33,6 +33,7 @@ import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
 /**
+ * 简单语句处理器
  * @author Clinton Begin
  */
 public class SimpleStatementHandler extends BaseStatementHandler {
@@ -41,21 +42,37 @@ public class SimpleStatementHandler extends BaseStatementHandler {
     super(executor, mappedStatement, parameter, rowBounds, resultHandler, boundSql);
   }
 
+  /**
+   * 执行更新（含插入、修改、删除）
+   * @param statement
+   * @return 返回更新的数量
+   * @throws SQLException
+   */
   @Override
   public int update(Statement statement) throws SQLException {
     String sql = boundSql.getSql();
+    // 获取参数对象
     Object parameterObject = boundSql.getParameterObject();
+    // 获取主键生成器
     KeyGenerator keyGenerator = mappedStatement.getKeyGenerator();
     int rows;
+    // 如果是数据库自增的主键生成器
     if (keyGenerator instanceof Jdbc3KeyGenerator) {
+      // 执行SQL 并且返回数据库生成的主键
       statement.execute(sql, Statement.RETURN_GENERATED_KEYS);
+      // 获取更新的数量
       rows = statement.getUpdateCount();
+      // 把自增的主键设置到参数对象中
       keyGenerator.processAfter(executor, mappedStatement, statement, parameterObject);
-    } else if (keyGenerator instanceof SelectKeyGenerator) {
+    } else if (keyGenerator instanceof SelectKeyGenerator) { // 如果是通过selectKey方式获取的主键
+      // 执行SQL
       statement.execute(sql);
+      // 获取更新的数量
       rows = statement.getUpdateCount();
+      // 把selectKey方式获取的主键设置到参数对象中
       keyGenerator.processAfter(executor, mappedStatement, statement, parameterObject);
     } else {
+      // 执行sql
       statement.execute(sql);
       rows = statement.getUpdateCount();
     }
@@ -82,11 +99,19 @@ public class SimpleStatementHandler extends BaseStatementHandler {
     return resultSetHandler.handleCursorResultSets(statement);
   }
 
+  /**
+   * 实例化语句
+   * @param connection 数据库连接
+   * @return
+   * @throws SQLException
+   */
   @Override
   protected Statement instantiateStatement(Connection connection) throws SQLException {
+    // 如果结果集类型是默认类型直接创建Statement
     if (mappedStatement.getResultSetType() == ResultSetType.DEFAULT) {
       return connection.createStatement();
     } else {
+      // 否则创建支持并发读的Statement 该Statement不支持update操作
       return connection.createStatement(mappedStatement.getResultSetType().getValue(), ResultSet.CONCUR_READ_ONLY);
     }
   }

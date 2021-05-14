@@ -34,18 +34,22 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
+ * 抽象的语句处理器
  * @author Clinton Begin
  */
 public abstract class BaseStatementHandler implements StatementHandler {
 
   protected final Configuration configuration;
+  /** 对象工厂，创建对象时使用 */
   protected final ObjectFactory objectFactory;
+  /** 类型处理器注册表 */
   protected final TypeHandlerRegistry typeHandlerRegistry;
   protected final ResultSetHandler resultSetHandler;
   protected final ParameterHandler parameterHandler;
 
   protected final Executor executor;
   protected final MappedStatement mappedStatement;
+  /** 行边界 */
   protected final RowBounds rowBounds;
 
   protected BoundSql boundSql;
@@ -85,14 +89,19 @@ public abstract class BaseStatementHandler implements StatementHandler {
     ErrorContext.instance().sql(boundSql.getSql());
     Statement statement = null;
     try {
+      // 实例化Statement
       statement = instantiateStatement(connection);
+      // 设置Statement超时时间
       setStatementTimeout(statement, transactionTimeout);
+      // 设置查询的条数
       setFetchSize(statement);
       return statement;
     } catch (SQLException e) {
+      // SQL异常关闭Statement
       closeStatement(statement);
       throw e;
     } catch (Exception e) {
+      // 关闭Statement
       closeStatement(statement);
       throw new ExecutorException("Error preparing statement.  Cause: " + e, e);
     }
@@ -100,8 +109,15 @@ public abstract class BaseStatementHandler implements StatementHandler {
 
   protected abstract Statement instantiateStatement(Connection connection) throws SQLException;
 
+  /**
+   * 设置Statement超时时间
+   * @param stmt 语句
+   * @param transactionTimeout 超时时间
+   * @throws SQLException
+   */
   protected void setStatementTimeout(Statement stmt, Integer transactionTimeout) throws SQLException {
     Integer queryTimeout = null;
+    // 映射语句有超时时间则使用映射语句的超时时间 否则使用全局配置的超时时间
     if (mappedStatement.getTimeout() != null) {
       queryTimeout = mappedStatement.getTimeout();
     } else if (configuration.getDefaultStatementTimeout() != null) {
@@ -113,7 +129,13 @@ public abstract class BaseStatementHandler implements StatementHandler {
     StatementUtil.applyTransactionTimeout(stmt, queryTimeout, transactionTimeout);
   }
 
+  /**
+   * 设置查询条数
+   * @param stmt 语句
+   * @throws SQLException
+   */
   protected void setFetchSize(Statement stmt) throws SQLException {
+    // 如果映射语句有条数则使用映射语句中的条数设置 否则使用全局默认配置
     Integer fetchSize = mappedStatement.getFetchSize();
     if (fetchSize != null) {
       stmt.setFetchSize(fetchSize);

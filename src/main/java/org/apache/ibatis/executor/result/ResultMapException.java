@@ -18,6 +18,7 @@ package org.apache.ibatis.executor.result;
 import org.apache.ibatis.exceptions.PersistenceException;
 
 /**
+ * 结果集异常
  * @author Ryan Lamore
  */
 public class ResultMapException extends PersistenceException {

@@ -23,6 +23,7 @@ import java.util.List;
 import org.apache.ibatis.cursor.Cursor;
 
 /**
+ * 结果集处理器
  * @author Clinton Begin
  */
 public interface ResultSetHandler {

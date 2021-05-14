@@ -25,14 +25,20 @@ import org.apache.ibatis.session.ResultContext;
 import org.apache.ibatis.session.ResultHandler;
 
 /**
+ * 默认Map结果处理器
  * @author Clinton Begin
  */
 public class DefaultMapResultHandler<K, V> implements ResultHandler<V> {
 
+  /** Map形式的映射结果 */
   private final Map<K, V> mappedResults;
+  /** Map的键。由用户指定，是结果对象中的某个属性名 */
   private final String mapKey;
+  /** 对象工厂 */
   private final ObjectFactory objectFactory;
+  /** 对象包装工厂 */
   private final ObjectWrapperFactory objectWrapperFactory;
+  /** 反射工厂 */
   private final ReflectorFactory reflectorFactory;
 
   @SuppressWarnings("unchecked")
@@ -44,11 +50,18 @@ public class DefaultMapResultHandler<K, V> implements ResultHandler<V> {
     this.mapKey = mapKey;
   }
 
+  /**
+   * 处理一个结果
+   * @param context 结果上下文
+   */
   @Override
   public void handleResult(ResultContext<? extends V> context) {
+    // 从结果上下文中取出结果对象
     final V value = context.getResultObject();
+    // 获得结果对象的元对象
     final MetaObject mo = MetaObject.forObject(value, objectFactory, objectWrapperFactory, reflectorFactory);
     // TODO is that assignment always true?
+    // 基于元对象取出key对应的值
     final K key = (K) mo.getValue(mapKey);
     mappedResults.put(key, value);
   }

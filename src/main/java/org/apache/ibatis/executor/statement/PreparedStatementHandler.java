@@ -33,6 +33,7 @@ import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
 /**
+ * 预处理的语句处理器
  * @author Clinton Begin
  */
 public class PreparedStatementHandler extends BaseStatementHandler {
@@ -44,10 +45,15 @@ public class PreparedStatementHandler extends BaseStatementHandler {
   @Override
   public int update(Statement statement) throws SQLException {
     PreparedStatement ps = (PreparedStatement) statement;
+    // 执行已预处理的语句
     ps.execute();
+    // 获取更新数量
     int rows = ps.getUpdateCount();
+    // 获取参数对象
     Object parameterObject = boundSql.getParameterObject();
+    // 获取主键生成器
     KeyGenerator keyGenerator = mappedStatement.getKeyGenerator();
+    // 把返回的主键设置到参数对象中
     keyGenerator.processAfter(executor, mappedStatement, ps, parameterObject);
     return rows;
   }
@@ -72,19 +78,29 @@ public class PreparedStatementHandler extends BaseStatementHandler {
     return resultSetHandler.handleCursorResultSets(ps);
   }
 
+  /**
+   * 实例化语句
+   * @param connection 数据库连接
+   * @return
+   * @throws SQLException
+   */
   @Override
   protected Statement instantiateStatement(Connection connection) throws SQLException {
     String sql = boundSql.getSql();
+    // 如果是数据库自增的主键生成器
     if (mappedStatement.getKeyGenerator() instanceof Jdbc3KeyGenerator) {
       String[] keyColumnNames = mappedStatement.getKeyColumns();
+      // 主键字段为空时
       if (keyColumnNames == null) {
+        // 预处理Statement支持返回生成的主键
         return connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
       } else {
+        // 主键字段不为空 则指定主键字段返回
         return connection.prepareStatement(sql, keyColumnNames);
       }
-    } else if (mappedStatement.getResultSetType() == ResultSetType.DEFAULT) {
+    } else if (mappedStatement.getResultSetType() == ResultSetType.DEFAULT) { // 如果结果集类型是默认类型直接创建预处理Statement
       return connection.prepareStatement(sql);
-    } else {
+    } else { // 否则创建支持并发读的预处理Statement 该预处理Statement不支持update操作
       return connection.prepareStatement(sql, mappedStatement.getResultSetType().getValue(), ResultSet.CONCUR_READ_ONLY);
     }
   }

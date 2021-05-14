@@ -202,6 +202,7 @@ public class CachingExecutor implements Executor {
   /**
    * 根据要求判断语句执行前是否要清除二级缓存，如果需要，清除二级缓存
    * 注意：默认情况下，非SELECT语句的isFlushCacheRequired方法会返回true
+   * 执行的非Select语句，一般都会清空缓存
    * @param ms MappedStatement
    */
   private void flushCacheIfRequired(MappedStatement ms) {

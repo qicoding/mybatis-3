@@ -45,7 +45,7 @@ import org.apache.ibatis.transaction.Transaction;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
- * 基础执行器
+ * 基础执行器 通过模板方法 定义了查询、修改的算法流程
  * @author Clinton Begin
  */
 public abstract class BaseExecutor implements Executor {
@@ -234,6 +234,14 @@ public abstract class BaseExecutor implements Executor {
     }
   }
 
+  /**
+   * 创建当前查询的缓存键值
+   * @param ms 映射语句对象
+   * @param parameterObject 参数对象
+   * @param rowBounds 翻页限制
+   * @param boundSql 绑定SQL
+   * @return
+   */
   @Override
   public CacheKey createCacheKey(MappedStatement ms, Object parameterObject, RowBounds rowBounds, BoundSql boundSql) {
     if (closed) {
@@ -246,7 +254,7 @@ public abstract class BaseExecutor implements Executor {
     cacheKey.update(boundSql.getSql());
     List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
     TypeHandlerRegistry typeHandlerRegistry = ms.getConfiguration().getTypeHandlerRegistry();
-    // mimic DefaultParameterHandler logic
+    // 模仿 DefaultParameterHandler 逻辑
     for (ParameterMapping parameterMapping : parameterMappings) {
       if (parameterMapping.getMode() != ParameterMode.OUT) {
         Object value;
@@ -331,6 +339,7 @@ public abstract class BaseExecutor implements Executor {
   }
 
   /**
+   * 设置事务超时时间
    * Apply a transaction timeout.
    *
    * @param statement
