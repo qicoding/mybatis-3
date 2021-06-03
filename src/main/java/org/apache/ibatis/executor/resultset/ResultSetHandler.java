@@ -28,10 +28,29 @@ import org.apache.ibatis.cursor.Cursor;
  */
 public interface ResultSetHandler {
 
+  /**
+   * 处理结果集为列表对象
+   * @param stmt 语句
+   * @param <E> 泛型对象
+   * @return 返回结果集对象列表
+   * @throws SQLException
+   */
   <E> List<E> handleResultSets(Statement stmt) throws SQLException;
 
+  /**
+   * 处理游标结果集
+   * @param stmt 语句
+   * @param <E> 泛型对象
+   * @return 返回游标结果集对象列表
+   * @throws SQLException
+   */
   <E> Cursor<E> handleCursorResultSets(Statement stmt) throws SQLException;
 
+  /**
+   * 处理输出参数
+   * @param cs 可回调语句
+   * @throws SQLException
+   */
   void handleOutputParameters(CallableStatement cs) throws SQLException;
 
 }

@@ -35,22 +35,30 @@ import org.apache.ibatis.transaction.Transaction;
 import org.apache.ibatis.transaction.TransactionFactory;
 
 /**
- * 结果集加载器
+ * 结果加载器
  * @author Clinton Begin
  */
 public class ResultLoader {
 
   protected final Configuration configuration;
+  /** 执行器 */
   protected final Executor executor;
+  /** MappedStatement对象（包含完整的增删改查节点信息） */
   protected final MappedStatement mappedStatement;
+  /** 参数对象 */
   protected final Object parameterObject;
   protected final Class<?> targetType;
+  /** 对象工厂，创建对象时使用 */
   protected final ObjectFactory objectFactory;
   protected final CacheKey cacheKey;
+  /** BoundSql对象（包含SQL语句、参数、实参信息） */
   protected final BoundSql boundSql;
+  /** 结果提取器 */
   protected final ResultExtractor resultExtractor;
+  /** 当前线程ID */
   protected final long creatorThreadId;
 
+  /** 是否已加载 */
   protected boolean loaded;
   protected Object resultObject;
 

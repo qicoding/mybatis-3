@@ -21,28 +21,41 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
+ * Object 类型处理器
  * @author Clinton Begin
  */
 public class ObjectTypeHandler extends BaseTypeHandler<Object> {
 
+  /**
+   * 直接调用 {@link PreparedStatement#setObject(int, Object)}
+   */
   @Override
   public void setNonNullParameter(PreparedStatement ps, int i, Object parameter, JdbcType jdbcType)
       throws SQLException {
     ps.setObject(i, parameter);
   }
 
+  /**
+   * 直接调用 {@link ResultSet#getObject(String)}
+   */
   @Override
   public Object getNullableResult(ResultSet rs, String columnName)
       throws SQLException {
     return rs.getObject(columnName);
   }
 
+  /**
+   * 直接调用 {@link ResultSet#getObject(int)}
+   */
   @Override
   public Object getNullableResult(ResultSet rs, int columnIndex)
       throws SQLException {
     return rs.getObject(columnIndex);
   }
 
+  /**
+   * 直接调用 {@link CallableStatement#getObject(int)}
+   */
   @Override
   public Object getNullableResult(CallableStatement cs, int columnIndex)
       throws SQLException {

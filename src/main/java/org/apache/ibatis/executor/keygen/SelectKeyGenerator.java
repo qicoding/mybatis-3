@@ -125,28 +125,55 @@ public class SelectKeyGenerator implements KeyGenerator {
     }
   }
 
+  /**
+   * 处理多个属性的情况,将结果对象对配置的列名属性值赋值到参数对象对应配置的属性属性值里
+   * @param keyProperties 属性集合
+   * @param metaParam 参数元对象
+   * @param metaResult 结果元对象
+   */
   private void handleMultipleProperties(String[] keyProperties,
       MetaObject metaParam, MetaObject metaResult) {
+    // 获取配置的列名数组
     String[] keyColumns = keyStatement.getKeyColumns();
-
+    // 没有配置列名数组或者列名数组是空数组
     if (keyColumns == null || keyColumns.length == 0) {
-      // no key columns specified, just use the property names
+      // no key columns specified, just use the property names 没有列名被指定是，只能使用属性名
+      // 遍历属性数组
       for (String keyProperty : keyProperties) {
+        // 将结果对象keyProperties的属性值赋值到参数对象keyProperties属性值里
         setValue(metaParam, keyProperty, metaResult.getValue(keyProperty));
       }
+      // 如果有配置列名数组且列名数组不是空数组时
     } else {
+      // 如果配置的列名数组长度跟配置的属性数组长度不一致时
       if (keyColumns.length != keyProperties.length) {
+        // 抛出异常
         throw new ExecutorException("If SelectKey has key columns, the number must match the number of key properties.");
       }
+      // 遍历属性数组
       for (int i = 0; i < keyProperties.length; i++) {
+        /*
+         * 注意这里由于i是同时当作列名数组的游标和属性数组的游标,直接取出相应位置元素进行赋值，并有判断它们是否对应，所以这里在mapper.xml
+         * 的列名数组和属性数组时顺序一定要一致，否则会出现属性和列名不对应而导致赋值错误
+         */
+        //将结果对象keyProperties[i]的属性值赋值到参数对象keyProperties[i]属性值里
         setValue(metaParam, keyProperties[i], metaResult.getValue(keyColumns[i]));
       }
     }
   }
 
+  /**
+   * 将 {@code value} 赋值到 {@code metaParam} 的 {@code property} 里
+   * @param metaParam 参数元对象
+   * @param property 属性名
+   * @param value 属性值
+   */
   private void setValue(MetaObject metaParam, String property, Object value) {
+    // 如果参数元对象存在property的setter方法
     if (metaParam.hasSetter(property)) {
+      // 将 value 赋值到 metaParam 的 property 里
       metaParam.setValue(property, value);
+      // 如果不存setter方法
     } else {
       throw new ExecutorException("No setter found for the keyProperty '" + property + "' in " + metaParam.getOriginalObject().getClass().getName() + ".");
     }

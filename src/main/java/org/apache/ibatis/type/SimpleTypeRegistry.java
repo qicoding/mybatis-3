@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * 基本数据类型处理器
  * @author Clinton Begin
  */
 public class SimpleTypeRegistry {

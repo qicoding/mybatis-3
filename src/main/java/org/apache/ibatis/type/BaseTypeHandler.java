@@ -24,11 +24,15 @@ import org.apache.ibatis.executor.result.ResultMapException;
 import org.apache.ibatis.session.Configuration;
 
 /**
+ * 一个基本的{@link TypeHandler}引用了一个泛型类型
  * The base {@link TypeHandler} for references a generic type.
  * <p>
  * Important: Since 3.5.0, This class never call the {@link ResultSet#wasNull()} and
  * {@link CallableStatement#wasNull()} method for handling the SQL {@code NULL} value.
  * In other words, {@code null} value handling should be performed on subclass.
+ *
+ * 重要提示：从 3.5.0 开始，此类从不调用 {@link ResultSet#wasNull()} 和 {@link CallableStatement#wasNull()} 方法来处理 SQL {@code NULL} 值。
+ * 换句话说，{@code null} 值处理应该在子类上执行。
  * </p>
  *
  * @author Clinton Begin
@@ -55,13 +59,26 @@ public abstract class BaseTypeHandler<T> extends TypeReference<T> implements Typ
     this.configuration = c;
   }
 
+  /**
+   *  把 java 对象设置到 PreparedStatement 的参数中
+   *  <p>
+   *      解决 {@link @paramter} ,{@link @jdbcType} 的情况。
+   *  </p>
+   *  <ol>
+   *      <li>{@link @jdbcType}为null,抛出 {@link TypeException}，也就是说{@link @jdbcType}调用这个方法的时候就已经确定了</li>
+   *      <li>{@link @parameter}为null时，对第{@link @i}个'?'设置null值;否则，
+   *      调用抽象方法{@link BaseTypeHandler#setNonNullParameter(PreparedStatement, int, Object, JdbcType)}</li>
+   *  </ol>
+   */
   @Override
   public void setParameter(PreparedStatement ps, int i, T parameter, JdbcType jdbcType) throws SQLException {
     if (parameter == null) {
+      // 一般情况下，jdbcType到这个方法时就已经确定了jdbcType.TYPE_CODE，
       if (jdbcType == null) {
         throw new TypeException("JDBC requires that the JdbcType must be specified for all nullable parameters.");
       }
       try {
+        // 设置null值。
         ps.setNull(i, jdbcType.TYPE_CODE);
       } catch (SQLException e) {
         throw new TypeException("Error setting null for parameter #" + i + " with JdbcType " + jdbcType + " . "
@@ -79,6 +96,12 @@ public abstract class BaseTypeHandler<T> extends TypeReference<T> implements Typ
     }
   }
 
+  /**
+   * 用于从 ResultSet 中取出数据转换为 java 对象
+   * <p>
+   *     直接调用{@link BaseTypeHandler#getNullableResult(ResultSet, String)}
+   * </p>
+   */
   @Override
   public T getResult(ResultSet rs, String columnName) throws SQLException {
     try {
@@ -88,6 +111,12 @@ public abstract class BaseTypeHandler<T> extends TypeReference<T> implements Typ
     }
   }
 
+  /**
+   * 用于从 ResultSet 中取出数据转换为 java 对象
+   * <p>
+   *     直接调用{@link BaseTypeHandler#getNullableResult(ResultSet, String)}
+   * </p>
+   */
   @Override
   public T getResult(ResultSet rs, int columnIndex) throws SQLException {
     try {
@@ -97,6 +126,12 @@ public abstract class BaseTypeHandler<T> extends TypeReference<T> implements Typ
     }
   }
 
+  /**
+   * 用于从 CallableStatement 中取出数据转换为 java 对象
+   * <p>
+   *     直接调用{@link BaseTypeHandler#getNullableResult(ResultSet, String)}
+   * </p>
+   */
   @Override
   public T getResult(CallableStatement cs, int columnIndex) throws SQLException {
     try {
@@ -106,9 +141,13 @@ public abstract class BaseTypeHandler<T> extends TypeReference<T> implements Typ
     }
   }
 
+  /**
+   * 设置不为空的参数
+   */
   public abstract void setNonNullParameter(PreparedStatement ps, int i, T parameter, JdbcType jdbcType) throws SQLException;
 
   /**
+   * 获取可空的结果
    * Gets the nullable result.
    *
    * @param rs
@@ -121,8 +160,14 @@ public abstract class BaseTypeHandler<T> extends TypeReference<T> implements Typ
    */
   public abstract T getNullableResult(ResultSet rs, String columnName) throws SQLException;
 
+  /**
+   * 获取可空的结果
+   */
   public abstract T getNullableResult(ResultSet rs, int columnIndex) throws SQLException;
 
+  /**
+   * 获取可空的结果
+   */
   public abstract T getNullableResult(CallableStatement cs, int columnIndex) throws SQLException;
 
 }

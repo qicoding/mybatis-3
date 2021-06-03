@@ -22,6 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * 指定别名的注解
  * The annotation that specify alias name.
  *
  * <p>

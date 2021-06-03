@@ -21,27 +21,36 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
+ * 类型处理器
+ * <p>
+ *     无论是 MyBatis 在预处理语句（PreparedStatement）中设置一个参数时，还是从结果集中取出一个值时，
+ *     都会用类型处理器将获取的值以合适的方式转换成 Java 类型
+ * </p>
+ *
  * @author Clinton Begin
  */
 public interface TypeHandler<T> {
 
+  /**
+   * 把 java 对象设置到 PreparedStatement 的参数中
+   * @param i 从1开始
+   */
   void setParameter(PreparedStatement ps, int i, T parameter, JdbcType jdbcType) throws SQLException;
 
   /**
-   * Gets the result.
-   *
-   * @param rs
-   *          the rs
-   * @param columnName
-   *          Colunm name, when configuration <code>useColumnLabel</code> is <code>false</code>
-   * @return the result
-   * @throws SQLException
-   *           the SQL exception
+   * 从 ResultSet 中取出columnName对应数据，然后转换为 java 对象
+   * @param columnName Colunm name, when configuration <code>useColumnLabel</code> is <code>false</code>
    */
   T getResult(ResultSet rs, String columnName) throws SQLException;
 
+  /**
+   * 用于从 ResultSet 中取出数据转换为 java 对象
+   */
   T getResult(ResultSet rs, int columnIndex) throws SQLException;
 
+  /**
+   * 用于从 CallableStatement 中取出数据转换为 java 对象
+   */
   T getResult(CallableStatement cs, int columnIndex) throws SQLException;
 
 }

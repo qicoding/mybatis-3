@@ -18,6 +18,9 @@ package org.apache.ibatis.cursor;
 import java.io.Closeable;
 
 /**
+ * 游标协定以使用Iterator延迟处理获取行数据。
+ * 游标非常适合处理通常不适合内存的数百万个项目查询。
+ * 如果在resultMaps中使用集合，则必须使用resultMap的id列对游标SQL查询进行排序（resultOrdered =“ true”）。
  * Cursor contract to handle fetching items lazily using an Iterator.
  * Cursors are a perfect fit to handle millions of items queries that would not normally fits in memory.
  * If you use collections in resultMaps then cursor SQL queries must be ordered (resultOrdered="true")
@@ -28,17 +31,19 @@ import java.io.Closeable;
 public interface Cursor<T> extends Closeable, Iterable<T> {
 
   /**
+   * 如果游标已开始从数据库中获取项目，则返回true
    * @return true if the cursor has started to fetch items from database.
    */
   boolean isOpen();
 
   /**
-   *
+   * 如果游标已被完全消耗，并且已返回所有与查询匹配的元素，则返回true。
    * @return true if the cursor is fully consumed and has returned all elements matching the query.
    */
   boolean isConsumed();
 
   /**
+   * 获取当前项目索引。第一项的索引为0。
    * Get the current item index. The first item has the index 0.
    *
    * @return -1 if the first cursor item has not been retrieved. The index of the current item retrieved.
