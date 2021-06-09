@@ -20,12 +20,15 @@ import java.util.concurrent.TimeUnit;
 import org.apache.ibatis.cache.Cache;
 
 /**
+ * 定时清空Cache，但是并没有开始一个定时任务，而是在使用Cache的时候，才去检查时间是否到了。
  * @author Clinton Begin
  */
 public class ScheduledCache implements Cache {
 
   private final Cache delegate;
+  /** 清除缓存数据的时间间隔，初始化为1小时 */
   protected long clearInterval;
+  /** 上一次清除的时间,初始化时赋值当前时间 */
   protected long lastClear;
 
   public ScheduledCache(Cache delegate) {
@@ -66,8 +69,12 @@ public class ScheduledCache implements Cache {
     return delegate.removeObject(key);
   }
 
+  /**
+   *  清空所有缓存数据
+   */
   @Override
   public void clear() {
+    // 记录当前时间
     lastClear = System.currentTimeMillis();
     delegate.clear();
   }
@@ -82,6 +89,9 @@ public class ScheduledCache implements Cache {
     return delegate.equals(obj);
   }
 
+  /**
+   * 判断是否到了清空数据的时间
+   */
   private boolean clearWhenStale() {
     if (System.currentTimeMillis() - lastClear > clearInterval) {
       clear();

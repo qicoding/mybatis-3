@@ -22,12 +22,18 @@ import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.cache.CacheException;
 
 /**
+ * 永久缓存 Cache接口实现类,里面就是维护着一个HashMap
+ * <p>
+ *     Cache接口只有这唯一一个基础实现，其他实现类全都是装饰模式持有另一个缓存对象
+ * </p>
  * @author Clinton Begin
  */
 public class PerpetualCache implements Cache {
 
+  /** 缓存对象的唯一标识 */
   private final String id;
 
+  /** 对象内部维护的HashMap,缓存Map */
   private final Map<Object, Object> cache = new HashMap<>();
 
   public PerpetualCache(String id) {
@@ -64,22 +70,34 @@ public class PerpetualCache implements Cache {
     cache.clear();
   }
 
+  /**
+   * 通过判断ID去实现相等,如果当前类型对象的ID属性为null会抛出{@link CacheException}
+   * @param o
+   * @return
+   */
   @Override
   public boolean equals(Object o) {
     if (getId() == null) {
       throw new CacheException("Cache instances require an ID.");
     }
+    // 判断地址
     if (this == o) {
       return true;
     }
+    // 非Cache的子类
     if (!(o instanceof Cache)) {
       return false;
     }
 
     Cache otherCache = (Cache) o;
+    // 判断ID
     return getId().equals(otherCache.getId());
   }
 
+  /**
+   * 把属性ID的hashCode作为本类对象的hashCode，如果当前类型对象的ID属性为null会抛出{@link CacheException}
+   * @return
+   */
   @Override
   public int hashCode() {
     if (getId() == null) {

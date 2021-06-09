@@ -22,10 +22,12 @@ import org.apache.ibatis.cache.decorators.TransactionalCache;
 import org.apache.ibatis.util.MapUtil;
 
 /**
+ * 事务缓存管理器
  * @author Clinton Begin
  */
 public class TransactionalCacheManager {
 
+  /** 缓存类与2级缓存事务缓冲区的映射关系 */
   private final Map<Cache, TransactionalCache> transactionalCaches = new HashMap<>();
 
   public void clear(Cache cache) {
@@ -52,6 +54,11 @@ public class TransactionalCacheManager {
     }
   }
 
+  /**
+   * 获取缓存对应的二级缓存事务缓冲区 如果不存在则新建一个返回
+   * @param cache
+   * @return
+   */
   private TransactionalCache getTransactionalCache(Cache cache) {
     return MapUtil.computeIfAbsent(transactionalCaches, cache, TransactionalCache::new);
   }

@@ -30,6 +30,10 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.io.SerialFilterChecker;
 
 /**
+ * 序列化功能，将值序列化后存到缓存中。该功能用于缓存返回一份实例的Copy，用于保存线程安全。
+ * <p>
+ *     该缓存只是保存在内存里
+ * </p>
  * @author Clinton Begin
  */
 public class SerializedCache implements Cache {
@@ -53,6 +57,7 @@ public class SerializedCache implements Cache {
   @Override
   public void putObject(Object key, Object object) {
     if (object == null || object instanceof Serializable) {
+      // 先序列化后再存放到缓存中
       delegate.putObject(key, serialize((Serializable) object));
     } else {
       throw new CacheException("SharedCache failed to make a copy of a non-serializable object: " + object);
@@ -62,6 +67,7 @@ public class SerializedCache implements Cache {
   @Override
   public Object getObject(Object key) {
     Object object = delegate.getObject(key);
+    // 不为空，则反序列化，生成一份Copy
     return object == null ? null : deserialize((byte[]) object);
   }
 
@@ -85,6 +91,9 @@ public class SerializedCache implements Cache {
     return delegate.equals(obj);
   }
 
+  /**
+   * 序列化
+   */
   private byte[] serialize(Serializable value) {
     try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(bos)) {
@@ -96,6 +105,9 @@ public class SerializedCache implements Cache {
     }
   }
 
+  /**
+   * 反序列化
+   */
   private Serializable deserialize(byte[] value) {
     SerialFilterChecker.check();
     Serializable result;
@@ -108,6 +120,9 @@ public class SerializedCache implements Cache {
     return result;
   }
 
+  /**
+   * 自定义对象输入流
+   */
   public static class CustomObjectInputStream extends ObjectInputStream {
 
     public CustomObjectInputStream(InputStream in) throws IOException {
@@ -116,6 +131,8 @@ public class SerializedCache implements Cache {
 
     @Override
     protected Class<?> resolveClass(ObjectStreamClass desc) throws ClassNotFoundException {
+      // 此方法只有在待序列化的类第一次序列化的时候才会被调用
+      // 遍历所支持的ClassLoader，加载对应的Class
       return Resources.classForName(desc.getName());
     }
 

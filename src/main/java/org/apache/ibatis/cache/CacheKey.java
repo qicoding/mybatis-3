@@ -23,12 +23,16 @@ import java.util.StringJoiner;
 import org.apache.ibatis.reflection.ArrayUtil;
 
 /**
+ * 缓存key包装类
  * @author Clinton Begin
  */
 public class CacheKey implements Cloneable, Serializable {
 
   private static final long serialVersionUID = 1146682552656046210L;
 
+  /**
+   * 空缓存key
+   */
   public static final CacheKey NULL_CACHE_KEY = new CacheKey() {
 
     @Override
@@ -42,13 +46,20 @@ public class CacheKey implements Cloneable, Serializable {
     }
   };
 
+  /** 计算hashcode的默认乘数因子 */
   private static final int DEFAULT_MULTIPLIER = 37;
+  /** 默认hashcode值 */
   private static final int DEFAULT_HASHCODE = 17;
 
+  /** 计算hashcode的乘数因子 */
   private final int multiplier;
+  /** hashcode值 */
   private int hashcode;
+  /** 用于校验的和 */
   private long checksum;
+  /** cacheKey包装对象计算hash的对象个数  */
   private int count;
+  /** cacheKey包装对象计算hash的对象列表  */
   // 8/21/2017 - Sonarlint flags this as needing to be marked transient. While true if content is not serializable, this
   // is not always true and thus should not be marked transient.
   private List<Object> updateList;
@@ -69,7 +80,12 @@ public class CacheKey implements Cloneable, Serializable {
     return updateList.size();
   }
 
+  /**
+   * 更新CacheKey 主要是重算hashcode
+   * @param object
+   */
   public void update(Object object) {
+    // 通过 {@link ArrayUtil} 获取到对象的hashCode
     int baseHashCode = object == null ? 1 : ArrayUtil.hashCode(object);
 
     count++;
@@ -87,30 +103,41 @@ public class CacheKey implements Cloneable, Serializable {
     }
   }
 
+  /**
+   * 重写equals方法
+   * @param object
+   * @return
+   */
   @Override
   public boolean equals(Object object) {
+    // 判断地址
     if (this == object) {
       return true;
     }
+    // 非CacheKey
     if (!(object instanceof CacheKey)) {
       return false;
     }
 
     final CacheKey cacheKey = (CacheKey) object;
-
+    // hashcode 不相同直接return false
     if (hashcode != cacheKey.hashcode) {
       return false;
     }
+    // 校验和不相等直接return false
     if (checksum != cacheKey.checksum) {
       return false;
     }
+    // 计数数量不相等直接return false
     if (count != cacheKey.count) {
       return false;
     }
 
+    // 遍历对象列表 判断每个对象是否相等
     for (int i = 0; i < updateList.size(); i++) {
       Object thisObject = updateList.get(i);
       Object thatObject = cacheKey.updateList.get(i);
+      // 通过 {@link ArrayUtil} 校验相等
       if (!ArrayUtil.equals(thisObject, thatObject)) {
         return false;
       }
@@ -123,6 +150,10 @@ public class CacheKey implements Cloneable, Serializable {
     return hashcode;
   }
 
+  /**
+   * 重写toString方法
+   * @return
+   */
   @Override
   public String toString() {
     StringJoiner returnValue = new StringJoiner(":");
@@ -132,6 +163,11 @@ public class CacheKey implements Cloneable, Serializable {
     return returnValue.toString();
   }
 
+  /**
+   * 重写clone方法
+   * @return
+   * @throws CloneNotSupportedException
+   */
   @Override
   public CacheKey clone() throws CloneNotSupportedException {
     CacheKey clonedCacheKey = (CacheKey) super.clone();
