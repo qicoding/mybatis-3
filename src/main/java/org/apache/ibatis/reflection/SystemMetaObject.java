@@ -21,12 +21,21 @@ import org.apache.ibatis.reflection.wrapper.DefaultObjectWrapperFactory;
 import org.apache.ibatis.reflection.wrapper.ObjectWrapperFactory;
 
 /**
+ * Mybatis的系统化MetaObject
+ * <p>
+ *     主要是为了方便构造 {@link MetaObject},里面声明了默认的{@link ObjectFactory},{@link ObjectWrapperFactory
+ *     对应 null 的 {@link MetaObject} ,以及构造{@link MetaObject}的简便方法
+ * </p>
+ *
  * @author Clinton Begin
  */
 public final class SystemMetaObject {
 
+  /** {@link DefaultObjectFactory} */
   public static final ObjectFactory DEFAULT_OBJECT_FACTORY = new DefaultObjectFactory();
+  /** {@link DefaultObjectWrapperFactory} */
   public static final ObjectWrapperFactory DEFAULT_OBJECT_WRAPPER_FACTORY = new DefaultObjectWrapperFactory();
+  /** 表示是个空对象 */
   public static final MetaObject NULL_META_OBJECT = MetaObject.forObject(NullObject.class, DEFAULT_OBJECT_FACTORY, DEFAULT_OBJECT_WRAPPER_FACTORY, new DefaultReflectorFactory());
 
   private SystemMetaObject() {
@@ -36,6 +45,15 @@ public final class SystemMetaObject {
   private static class NullObject {
   }
 
+  /**
+   * 直接调用{@link MetaObject#forObject(Object, ObjectFactory, ObjectWrapperFactory, ReflectorFactory)}
+   * <p>
+   *     将(参数object),{@link SystemMetaObject#DEFAULT_OBJECT_FACTORY},{@link SystemMetaObject#DEFAULT_OBJECT_WRAPPER_FACTORY},
+   *
+   * </p>
+   * @param object
+   * @return
+   */
   public static MetaObject forObject(Object object) {
     return MetaObject.forObject(object, DEFAULT_OBJECT_FACTORY, DEFAULT_OBJECT_WRAPPER_FACTORY, new DefaultReflectorFactory());
   }
