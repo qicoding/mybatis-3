@@ -23,26 +23,41 @@ import org.apache.ibatis.reflection.ReflectionException;
 import org.apache.ibatis.reflection.property.PropertyTokenizer;
 
 /**
- * 基本数据类型包装器
+ * 基础包装器
  * @author Clinton Begin
  */
 public abstract class BaseWrapper implements ObjectWrapper {
 
   protected static final Object[] NO_ARGUMENTS = new Object[0];
+  /** 当前对应的 MetaObject */
   protected final MetaObject metaObject;
 
   protected BaseWrapper(MetaObject metaObject) {
     this.metaObject = metaObject;
   }
 
+  /**
+   * 处理集合对象
+   * @param prop
+   * @param object
+   * @return
+   */
   protected Object resolveCollection(PropertyTokenizer prop, Object object) {
+    // 如果是空串，表示是对象 object 本身
     if ("".equals(prop.getName())) {
       return object;
+      // 否则从 ObjectWrapper 中获取对应 prop 在当前类中属性对象
     } else {
       return metaObject.getValue(prop.getName());
     }
   }
 
+  /**
+   * 获取集合中下标或 key 为 index 的值
+   * @param prop
+   * @param collection
+   * @return
+   */
   protected Object getCollectionValue(PropertyTokenizer prop, Object collection) {
     if (collection instanceof Map) {
       return ((Map) collection).get(prop.getIndex());

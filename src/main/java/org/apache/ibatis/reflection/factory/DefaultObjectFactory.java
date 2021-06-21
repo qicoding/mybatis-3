@@ -43,6 +43,7 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
 
   @Override
   public <T> T create(Class<T> type) {
+    // 通过无参构造器创建指定类的对象
     return create(type, null, null);
   }
 
@@ -51,17 +52,29 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
   public <T> T create(Class<T> type, List<Class<?>> constructorArgTypes, List<Object> constructorArgs) {
     Class<?> classToCreate = resolveInterface(type);
     // we know types are assignable
+    // 实例化类
     return (T) instantiateClass(classToCreate, constructorArgTypes, constructorArgs);
   }
 
+  /**
+   * 实例化类
+   * @param type
+   * @param constructorArgTypes
+   * @param constructorArgs
+   * @param <T>
+   * @return
+   */
   private  <T> T instantiateClass(Class<T> type, List<Class<?>> constructorArgTypes, List<Object> constructorArgs) {
     try {
       Constructor<T> constructor;
+      // 如果构造的参数类型或参数对象为null
       if (constructorArgTypes == null || constructorArgs == null) {
+        // 通过无参构造对象
         constructor = type.getDeclaredConstructor();
         try {
           return constructor.newInstance();
         } catch (IllegalAccessException e) {
+          // 从java安全管理器中获取suppressAccessChecks反射权限是否存在，存在返回true,否则false
           if (Reflector.canControlMemberAccessible()) {
             constructor.setAccessible(true);
             return constructor.newInstance();
@@ -70,6 +83,7 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
           }
         }
       }
+      // 根据指定的参数列表查找构造函数，并实例化对象
       constructor = type.getDeclaredConstructor(constructorArgTypes.toArray(new Class[0]));
       try {
         return constructor.newInstance(constructorArgs.toArray(new Object[0]));
@@ -90,14 +104,23 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
     }
   }
 
+  /**
+   * 解析接口
+   * @param type
+   * @return
+   */
   protected Class<?> resolveInterface(Class<?> type) {
     Class<?> classToCreate;
+    // 如果是List、Collection、Iterable默认类型是ArrayList
     if (type == List.class || type == Collection.class || type == Iterable.class) {
       classToCreate = ArrayList.class;
+      // 如果是Map类型 默认是HashMap
     } else if (type == Map.class) {
       classToCreate = HashMap.class;
+      // 如果是SortedSet类型 默认是TreeSet
     } else if (type == SortedSet.class) { // issue #510 Collections Support
       classToCreate = TreeSet.class;
+      // 如果是Set类型 默认是HashSet
     } else if (type == Set.class) {
       classToCreate = HashSet.class;
     } else {

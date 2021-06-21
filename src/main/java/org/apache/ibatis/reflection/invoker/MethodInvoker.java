@@ -44,6 +44,7 @@ public class MethodInvoker implements Invoker {
     try {
       return method.invoke(target, args);
     } catch (IllegalAccessException e) {
+      // 从java安全管理器中获取suppressAccessChecks反射权限是否存在，存在返回true,否则false
       if (Reflector.canControlMemberAccessible()) {
         method.setAccessible(true);
         return method.invoke(target, args);

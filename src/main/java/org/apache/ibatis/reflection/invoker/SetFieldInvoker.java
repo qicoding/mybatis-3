@@ -35,6 +35,7 @@ public class SetFieldInvoker implements Invoker {
     try {
       field.set(target, args[0]);
     } catch (IllegalAccessException e) {
+      // 从java安全管理器中获取suppressAccessChecks反射权限是否存在，存在返回true,否则false
       if (Reflector.canControlMemberAccessible()) {
         field.setAccessible(true);
         field.set(target, args[0]);
